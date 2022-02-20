@@ -76,21 +76,19 @@ void ClearShaderCache(std::map<std::string, Shader> cache) {
 Shader loadShaderFromFile(const char *vertexFilePath, const char *fragmentFilePath) {
     std::string vertexCode;
     std::string fragmentCode;
+
+    // @improve: Learn the best way to open and read file
     try {
-        // open files
         std::ifstream vertexShaderFile(vertexFilePath);
         std::ifstream fragmentShaderFile(fragmentFilePath);
         std::stringstream vShaderStream, fShaderStream;
 
-        // read file's buffer contents into streams
         vShaderStream << vertexShaderFile.rdbuf();
         fShaderStream << fragmentShaderFile.rdbuf();
 
-        // close file handlers
         vertexShaderFile.close();
         fragmentShaderFile.close();
 
-        // convert stream into string
         vertexCode = vShaderStream.str();
         fragmentCode = fShaderStream.str();
     }

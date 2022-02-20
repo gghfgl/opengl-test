@@ -22,6 +22,7 @@ namespace Log
         std::string info = "[*DEBUG] ";
         info.append(fmt);
 
+        // @improve: Seems deprecated C99
         va_list args;
         va_start(args, fmt);
         vprintf(info.c_str(), args);
