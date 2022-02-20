@@ -20,9 +20,9 @@ struct Texture2D {
 };
 
 void generateTexture(Texture2D* texture, uint32 width, uint32 height, unsigned char* data);
-Texture2D loadTextureFromFile(const char *file, bool alpha);
 
-Texture2D InitTexture(uint32 width, uint32 height) {
+// @delete: Seems useless right?
+Texture2D InitTexture(uint32 width, uint32 height, bool alpha) {
     Texture2D texture;
     texture.Width = width;
     texture.Height = height;
@@ -33,46 +33,44 @@ Texture2D InitTexture(uint32 width, uint32 height) {
     texture.FilterMin = GL_LINEAR;
     texture.FilterMax = GL_LINEAR;
 
-    glGenTextures(1, &texture.ID);
-
-    return texture;
-}
-
-void BindTexture(Texture2D* texture) {
-    glBindTexture(GL_TEXTURE_2D, texture->ID);
-}
-
-Texture2D AddTextureToCache(std::map<std::string, Texture2D> cache, std::string name, const char *file, bool alpha) {
-    cache[name] = loadTextureFromFile(file, alpha);
-    return cache[name];
-}
-
-// @remove: Seems useless code.
-Texture2D GetTextureFromCache(std::map<std::string, Texture2D> cache, std::string name) {
-    return cache[name];
-}
-
-void ClearTextureCache(std::map<std::string, Texture2D> cache) {
-    for (auto iter : cache)
-        glDeleteTextures(1, &iter.second.ID);
-}
-
-// @improve: Use InitTexture function.
-Texture2D loadTextureFromFile(const char *file, bool alpha) {
-    Texture2D texture;
     if (alpha) {
         texture.InternalFormat = GL_RGBA;
         texture.ImageFormat = GL_RGBA;
     }
 
-    int width, height, nrChannels;
-    unsigned char* data = stbi_load(file, &width, &height, &nrChannels, 0);
-
-    generateTexture(&texture, width, height, data);
-
-    stbi_image_free(data);
+    glGenTextures(1, &texture.ID);
 
     return texture;
+}
+
+// @remove: Seems unused.
+void BindTexture(Texture2D* texture) {
+    glBindTexture(GL_TEXTURE_2D, texture->ID);
+}
+
+void AddTextureToCache(Texture2D texture, std::string key, std::map<std::string, Texture2D> &cache) {
+    cache[key] = texture;
+}
+
+// @remove: Seems useless code.
+Texture2D GetTextureFromCache(std::map<std::string, Texture2D> &cache, std::string key) {
+    return cache[key];
+}
+
+void ClearTextureCache(std::map<std::string, Texture2D> &cache) {
+    for (auto iter : cache)
+        glDeleteTextures(1, &iter.second.ID);
+}
+
+void LoadTextureFromFile(Texture2D* texture, const char *file) {
+    int width, height, nrChannels;
+    unsigned char* data = stbi_load(file, &width, &height, &nrChannels, 0);
+    if (!data) {
+        Log::error("Failed to load image: %s\n", file);
+    }
+
+    generateTexture(texture, width, height, data);
+    stbi_image_free(data);
 }
 
 void generateTexture(Texture2D* texture, uint32 width, uint32 height, unsigned char* data) {

@@ -14,19 +14,18 @@ struct Shader {
     uint32 ID;
 };
 
-Shader loadShaderFromFile(const char *vertexFilePath, const char *fragmentFilePath);
-Shader compileShaderSources(const char* vertexSource, const char* fragmentSource);
+void compileShaderSources(Shader* shader, const char* vertexSource, const char* fragmentSource);
 void checkShaderCompileErrors(uint32 object, std::string type);
 
-void SetShaderFloat(Shader shader, const char *name, float value) {
+void SetShaderFloat(Shader shader, const char *name, float32 value) {
     glUniform1f(glGetUniformLocation(shader.ID, name), value);
 }
 
-void SetShaderInteger(Shader shader, const char *name, int value) {
+void SetShaderInteger(Shader shader, const char *name, int32 value) {
     glUniform1i(glGetUniformLocation(shader.ID, name), value);
 }
 
-void SetShaderVector2f(Shader shader, const char *name, float x, float y) {
+void SetShaderVector2f(Shader shader, const char *name, float32 x, float32 y) {
     glUniform2f(glGetUniformLocation(shader.ID, name), x, y);
 }
 
@@ -34,7 +33,7 @@ void SetShaderVector2f(Shader shader, const char *name, const glm::vec2 &value) 
     glUniform2f(glGetUniformLocation(shader.ID, name), value.x, value.y);
 }
 
-void SetShaderVector3f(Shader shader, const char *name, float x, float y, float z) {
+void SetShaderVector3f(Shader shader, const char *name, float32 x, float32 y, float32 z) {
     glUniform3f(glGetUniformLocation(shader.ID, name), x, y, z);
 }
 
@@ -42,7 +41,7 @@ void SetShaderVector3f(Shader shader, const char *name, const glm::vec3 &value) 
     glUniform3f(glGetUniformLocation(shader.ID, name), value.x, value.y, value.z);
 }
 
-void SetShaderVector4f(Shader shader, const char *name, float x, float y, float z, float w) {
+void SetShaderVector4f(Shader shader, const char *name, float32 x, float32 y, float32 z, float32 w) {
     glUniform4f(glGetUniformLocation(shader.ID, name), x, y, z, w);
 }
 
@@ -58,39 +57,38 @@ void UseShader(Shader shader) {
     glUseProgram(shader.ID);
 }
 
-Shader AddShaderToCache(std::map<std::string, Shader> cache, std::string name, const char *vertexShaderFile, const char *fragmentShaderFile) {
-    cache[name] = loadShaderFromFile(vertexShaderFile, fragmentShaderFile);
-    return cache[name];
+void AddShaderToCache(Shader shader, std::string key, std::map<std::string, Shader> &cache) {
+    cache[key] = shader;
 }
 
 // @remove: Seems useless code
-Shader GetShaderFromCache(std::map<std::string, Shader> cache, std::string name) {
-    return cache[name];
+Shader GetShaderFromCache(std::map<std::string, Shader> &cache, std::string key) {
+    return cache[key];
 }
 
-void ClearShaderCache(std::map<std::string, Shader> cache) {
+void ClearShaderCache(std::map<std::string, Shader> &cache) {
     for (auto iter : cache)
         glDeleteProgram(iter.second.ID);
 }
 
-Shader loadShaderFromFile(const char *vertexFilePath, const char *fragmentFilePath) {
+void LoadShaderFromFile(Shader* shader, const char *vertexShaderFile, const char *fragmentShaderFile) {
     std::string vertexCode;
     std::string fragmentCode;
 
     // @improve: Learn the best way to open and read file
     try {
-        std::ifstream vertexShaderFile(vertexFilePath);
-        std::ifstream fragmentShaderFile(fragmentFilePath);
-        std::stringstream vShaderStream, fShaderStream;
+        std::ifstream vertexFile(vertexShaderFile);
+        std::ifstream fragmentFile(fragmentShaderFile);
+        std::stringstream vertexStream, fragmentStream;
 
-        vShaderStream << vertexShaderFile.rdbuf();
-        fShaderStream << fragmentShaderFile.rdbuf();
+        vertexStream << vertexFile.rdbuf();
+        fragmentStream << fragmentFile.rdbuf();
 
-        vertexShaderFile.close();
-        fragmentShaderFile.close();
+        vertexFile.close();
+        fragmentFile.close();
 
-        vertexCode = vShaderStream.str();
-        fragmentCode = fShaderStream.str();
+        vertexCode = vertexStream.str();
+        fragmentCode = fragmentStream.str();
     }
     catch (std::exception e)
     {
@@ -100,12 +98,10 @@ Shader loadShaderFromFile(const char *vertexFilePath, const char *fragmentFilePa
     const char *vertexSource = vertexCode.c_str();
     const char *fragmentSource = fragmentCode.c_str();
 
-    Shader shader = compileShaderSources(vertexSource, fragmentSource);
-
-    return shader;
+    compileShaderSources(shader, vertexSource, fragmentSource);
 }
 
-Shader compileShaderSources(const char* vertexSource, const char* fragmentSource) {
+void compileShaderSources(Shader* shader, const char* vertexSource, const char* fragmentSource) {
     uint32 vertexShader, fragmentShader;
 
     vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -118,18 +114,15 @@ Shader compileShaderSources(const char* vertexSource, const char* fragmentSource
     glCompileShader(fragmentShader);
     checkShaderCompileErrors(fragmentShader, "FRAGMENT");
 
-    Shader shader;
-    shader.ID = glCreateProgram();
-    glAttachShader(shader.ID, vertexShader);
-    glAttachShader(shader.ID, fragmentShader);
-    glLinkProgram(shader.ID);
+    shader->ID = glCreateProgram();
+    glAttachShader(shader->ID, vertexShader);
+    glAttachShader(shader->ID, fragmentShader);
+    glLinkProgram(shader->ID);
 
-    checkShaderCompileErrors(shader.ID, "PROGRAM");
+    checkShaderCompileErrors(shader->ID, "PROGRAM");
 
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
-
-    return shader;
 }
 
 void checkShaderCompileErrors(uint32 object, std::string type) {

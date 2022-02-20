@@ -6,8 +6,8 @@ if not defined DevEnvDir (
 
 set GLFW3LIB="..\lib\glfw-3.3.6\build\src\Debug"
 set GLFW3INC="..\lib\glfw-3.3.6\include"
-set GLADINC="..\lib\glad\include"
-set GLADSRC="..\lib\glad\src\glad.c"
+set GLADINC="..\lib\glad-4.5.0\include"
+set GLADSRC="..\lib\glad-4.5.0\src\glad.c"
 set STBSRC="..\lib\stb"
 set GLMINC="..\lib\glm"
 
