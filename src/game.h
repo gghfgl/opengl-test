@@ -1,7 +1,8 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include "shader.h"
+//static std::map<std::string, Shader>    ShaderCache;
+//static std::map<std::string, Texture2D> TextureCache;
 
 enum GameState {
     GAME_ACTIVE,

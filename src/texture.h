@@ -1,49 +1,91 @@
-#ifndef TEXTURE_H
-#define TEXTURE_H
+#pragma once
 
+#include <map>
+#include <string>
 #include <iostream>
+
 #include <glad/glad.h>
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
-// Texture2D is able to store and configure a texture in OpenGL.
-// It also hosts utility functions for easy management.
-struct Texture2D
-{
-    // holds the ID of the texture object, used for all texture operations to reference to this particlar texture
-    unsigned int ID;
-    // texture image dimensions
-    unsigned int Width, Height; // width and height of loaded image in pixels
-    // texture Format
-    unsigned int Internal_Format; // format of texture object
-    unsigned int Image_Format; // format of loaded image
-    // texture configuration
-    unsigned int Wrap_S; // wrapping mode on S axis
-    unsigned int Wrap_T; // wrapping mode on T axis
-    unsigned int Filter_Min; // filtering mode if texture pixels < screen pixels
-    unsigned int Filter_Max; // filtering mode if texture pixels > screen pixels
-
-Texture2D()
-    : Width(0), Height(0), Internal_Format(GL_RGB), Image_Format(GL_RGB), Wrap_S(GL_REPEAT), Wrap_T(GL_REPEAT), Filter_Min(GL_LINEAR), Filter_Max(GL_LINEAR) {
-        glGenTextures(1, &this->ID);
-    }
-
-    void Generate(unsigned int width, unsigned int height, unsigned char* data) {
-        this->Width = width;
-        this->Height = height;
-        // create Texture
-        glBindTexture(GL_TEXTURE_2D, this->ID);
-        glTexImage2D(GL_TEXTURE_2D, 0, this->Internal_Format, width, height, 0, this->Image_Format, GL_UNSIGNED_BYTE, data);
-        // set Texture wrap and filter modes
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, this->Wrap_S);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, this->Wrap_T);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, this->Filter_Min);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, this->Filter_Max);
-        // unbind texture
-        glBindTexture(GL_TEXTURE_2D, 0);
-    }
-
-    void Bind() const {
-        glBindTexture(GL_TEXTURE_2D, this->ID);
-    }
+struct Texture2D {
+    uint32 ID;
+    uint32 Width, Height; // width and height of loaded image in pixels
+    uint32 InternalFormat; // format of texture object
+    uint32 ImageFormat; // format of loaded image
+    uint32 WrapAxisS; // wrapping mode on S axis
+    uint32 WrapAxisT; // wrapping mode on T axis
+    uint32 FilterMin; // filtering mode if texture pixels < screen pixels
+    uint32 FilterMax; // filtering mode if texture pixels > screen pixels
 };
 
-#endif
+void generateTexture(Texture2D* texture, uint32 width, uint32 height, unsigned char* data);
+Texture2D loadTextureFromFile(const char *file, bool alpha);
+
+Texture2D InitTexture(uint32 width, uint32 height) {
+    Texture2D texture;
+    texture.Width = width;
+    texture.Height = height;
+    texture.InternalFormat = GL_RGB;
+    texture.ImageFormat = GL_RGB;
+    texture.WrapAxisS = GL_REPEAT;
+    texture.WrapAxisT = GL_REPEAT;
+    texture.FilterMin = GL_LINEAR;
+    texture.FilterMax = GL_LINEAR;
+
+    glGenTextures(1, &texture.ID);
+
+    return texture;
+}
+
+void BindTexture(Texture2D* texture) {
+    glBindTexture(GL_TEXTURE_2D, texture->ID);
+}
+
+Texture2D AddTextureToCache(std::map<std::string, Texture2D> cache, std::string name, const char *file, bool alpha) {
+    cache[name] = loadTextureFromFile(file, alpha);
+    return cache[name];
+}
+
+// @remove: Seems useless code.
+Texture2D GetTextureFromCache(std::map<std::string, Texture2D> cache, std::string name) {
+    return cache[name];
+}
+
+void ClearTextureCache(std::map<std::string, Texture2D> cache) {
+    for (auto iter : cache)
+        glDeleteTextures(1, &iter.second.ID);
+}
+
+// @improve: Use InitTexture function.
+Texture2D loadTextureFromFile(const char *file, bool alpha) {
+    Texture2D texture;
+    if (alpha) {
+        texture.InternalFormat = GL_RGBA;
+        texture.ImageFormat = GL_RGBA;
+    }
+
+    int width, height, nrChannels;
+    unsigned char* data = stbi_load(file, &width, &height, &nrChannels, 0);
+
+    generateTexture(&texture, width, height, data);
+
+    stbi_image_free(data);
+
+    return texture;
+}
+
+void generateTexture(Texture2D* texture, uint32 width, uint32 height, unsigned char* data) {
+    texture->Width = width;
+    texture->Height = height;
+
+    glBindTexture(GL_TEXTURE_2D, texture->ID);
+    glTexImage2D(GL_TEXTURE_2D, 0, texture->InternalFormat, width, height, 0, texture->ImageFormat, GL_UNSIGNED_BYTE, data);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, texture->WrapAxisS);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, texture->WrapAxisT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture->FilterMin);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture->FilterMax);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
