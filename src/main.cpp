@@ -13,13 +13,10 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void GLAPIENTRY MessageCallback( GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam );
 
-// The Width of the screen
 const unsigned int SCREEN_WIDTH = 800;
-// The height of the screen
 const unsigned int SCREEN_HEIGHT = 600;
 
-Game Breakout(SCREEN_WIDTH, SCREEN_HEIGHT);
-
+Game Breakout;;
 
 int main(int argc, char *argv[])
 {
@@ -56,7 +53,7 @@ int main(int argc, char *argv[])
     
     // initialize game
     // ---------------
-    Breakout.Init();
+    Breakout = InitGame(SCREEN_WIDTH, SCREEN_HEIGHT);
 
     // deltaTime variables
     // -------------------
@@ -74,17 +71,17 @@ int main(int argc, char *argv[])
 
         // manage user input
         // -----------------
-        Breakout.ProcessInput(deltaTime);
+        ProcessInput(deltaTime);
 
         // update game state
         // -----------------
-        Breakout.Update(deltaTime);
+        Update(deltaTime);
 
         // render
         // ------
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        Breakout.Render();
+        Render(Breakout.Renderer);
 
         glfwSwapBuffers(window);
     }
