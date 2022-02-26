@@ -10,13 +10,13 @@
 
 struct Texture2D {
     uint32 ID;
-    uint32 Width, Height; // width and height of loaded image in pixels
-    uint32 InternalFormat; // format of texture object
-    uint32 ImageFormat; // format of loaded image
-    uint32 WrapAxisS; // wrapping mode on S axis
-    uint32 WrapAxisT; // wrapping mode on T axis
-    uint32 FilterMin; // filtering mode if texture pixels < screen pixels
-    uint32 FilterMax; // filtering mode if texture pixels > screen pixels
+    uint32 width, height; // width and height of loaded image in pixels
+    uint32 internalFormat; // format of texture object
+    uint32 imageFormat; // format of loaded image
+    uint32 wrapAxisS; // wrapping mode on S axis
+    uint32 wrapAxisT; // wrapping mode on T axis
+    uint32 filterMin; // filtering mode if texture pixels < screen pixels
+    uint32 filterMax; // filtering mode if texture pixels > screen pixels
 };
 
 void generateTexture(Texture2D* texture, uint32 width, uint32 height, unsigned char* data);
@@ -24,21 +24,51 @@ void generateTexture(Texture2D* texture, uint32 width, uint32 height, unsigned c
 // @delete: Seems useless right?
 Texture2D InitTexture(uint32 width, uint32 height, bool alpha) {
     Texture2D texture;
-    texture.Width = width;
-    texture.Height = height;
-    texture.InternalFormat = GL_RGB;
-    texture.ImageFormat = GL_RGB;
-    texture.WrapAxisS = GL_REPEAT;
-    texture.WrapAxisT = GL_REPEAT;
-    texture.FilterMin = GL_LINEAR;
-    texture.FilterMax = GL_LINEAR;
+    texture.width = width;
+    texture.height = height;
+    texture.internalFormat = GL_RGB;
+    texture.imageFormat = GL_RGB;
+    texture.wrapAxisS = GL_REPEAT;
+    texture.wrapAxisT = GL_REPEAT;
+    texture.filterMin = GL_LINEAR;
+    texture.filterMax = GL_LINEAR;
 
     if (alpha) {
-        texture.InternalFormat = GL_RGBA;
-        texture.ImageFormat = GL_RGBA;
+        texture.internalFormat = GL_RGBA;
+        texture.imageFormat = GL_RGBA;
     }
 
     glGenTextures(1, &texture.ID);
+
+    return texture;
+}
+
+Texture2D LoadTextureFromFile(const char *file, bool alpha) {
+    int width, height, nrChannels;
+    unsigned char* data = stbi_load(file, &width, &height, &nrChannels, 0);
+    if (!data) {
+        Log::error("TEXTURE: Failed to load image from file: %s\n", file);
+    }
+
+    Texture2D texture;
+    texture.width = width;
+    texture.height = height;
+    texture.internalFormat = GL_RGB;
+    texture.imageFormat = GL_RGB;
+    texture.wrapAxisS = GL_REPEAT;
+    texture.wrapAxisT = GL_REPEAT;
+    texture.filterMin = GL_LINEAR;
+    texture.filterMax = GL_LINEAR;
+
+    if (alpha) {
+        texture.internalFormat = GL_RGBA;
+        texture.imageFormat = GL_RGBA;
+    }
+
+    glGenTextures(1, &texture.ID);
+
+    generateTexture(&texture, width, height, data);
+    stbi_image_free(data);
 
     return texture;
 }
@@ -62,28 +92,17 @@ void ClearTextureCache(std::map<std::string, Texture2D> &cache) {
         glDeleteTextures(1, &iter.second.ID);
 }
 
-void LoadTextureFromFile(Texture2D* texture, const char *file) {
-    int width, height, nrChannels;
-    unsigned char* data = stbi_load(file, &width, &height, &nrChannels, 0);
-    if (!data) {
-        Log::error("Failed to load image: %s\n", file);
-    }
-
-    generateTexture(texture, width, height, data);
-    stbi_image_free(data);
-}
-
 void generateTexture(Texture2D* texture, uint32 width, uint32 height, unsigned char* data) {
-    texture->Width = width;
-    texture->Height = height;
+    texture->width = width;
+    texture->height = height;
 
     glBindTexture(GL_TEXTURE_2D, texture->ID);
-    glTexImage2D(GL_TEXTURE_2D, 0, texture->InternalFormat, width, height, 0, texture->ImageFormat, GL_UNSIGNED_BYTE, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, texture->internalFormat, width, height, 0, texture->imageFormat, GL_UNSIGNED_BYTE, data);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, texture->WrapAxisS);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, texture->WrapAxisT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture->FilterMin);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture->FilterMax);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, texture->wrapAxisS);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, texture->wrapAxisT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture->filterMin);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture->filterMax);
 
     glBindTexture(GL_TEXTURE_2D, 0);
 }

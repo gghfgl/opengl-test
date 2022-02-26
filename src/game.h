@@ -34,40 +34,39 @@ Game* InitGame(uint32 width, uint32 height) {
     textureCache.clear();
     std::map<std::string, Shader> shaderCache;
     shaderCache.clear();
-    
-    // load and configure shaders
-    // Shader* spriteShader = LoadShaderFromFile(&spriteShader, "..\\shaders\\sprite_vertex.glsl", "..\\shaders\\sprite_fragment.glsl");
-    Shader spriteShader = LoadShaderFromFile("..\\shaders\\sprite.glsl");
-    AddShaderToCache(spriteShader, "sprite", shaderCache);
+
+    // Set projection.
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float32>(width), static_cast<float32>(height), 0.0f, -1.0f, 1.0f);
+    
+    // Load and configure shaders.
+    Shader spriteShader = LoadShaderFromFile("..\\shaders\\sprite.glsl");
     UseShader(spriteShader);
     SetShaderInteger(spriteShader, "image", 0);
     SetShaderMatrix4(spriteShader, "projection", projection);
+    AddShaderToCache(spriteShader, "sprite", shaderCache);
 
-    // load textures
-    Texture2D texFace = InitTexture(0, 0, true);
-    LoadTextureFromFile(&texFace, "..\\assets\\awesomeface.png");
-    AddTextureToCache(texFace, "face", textureCache);
+    // Load textures.
+    /* Texture2D texFace = LoadTextureFromFile(&texFace, "..\\assets\\awesomeface.png", true); */
+    /* AddTextureToCache(texFace, "face", textureCache); */
 
-    Texture2D texBackground = InitTexture(0, 0, false);
-    LoadTextureFromFile(&texBackground, "..\\assets\\background.jpg");
-    AddTextureToCache(texBackground, "background", textureCache);
+    /* Texture2D texBackground = InitTexture(0, 0, false); */
+    /* LoadTextureFromFile(&texBackground, "..\\assets\\background.jpg"); */
+    /* AddTextureToCache(texBackground, "background", textureCache); */
 
-    Texture2D texBrick = InitTexture(0, 0, false);
-    LoadTextureFromFile(&texBrick, "..\\assets\\brick.png");
-    AddTextureToCache(texBrick, "brick", textureCache);
+    /* Texture2D texBrick = InitTexture(0, 0, false); */
+    /* LoadTextureFromFile(&texBrick, "..\\assets\\brick.png"); */
+    /* AddTextureToCache(texBrick, "brick", textureCache); */
 
-    Texture2D texBrickSolid = InitTexture(0, 0, false);
-    LoadTextureFromFile(&texBrickSolid, "..\\assets\\brick_solid.png");
-    AddTextureToCache(texBrickSolid, "brick_solid", textureCache);
+    /* Texture2D texBrickSolid = InitTexture(0, 0, false); */
+    /* LoadTextureFromFile(&texBrickSolid, "..\\assets\\brick_solid.png"); */
+    /* AddTextureToCache(texBrickSolid, "brick_solid", textureCache); */
 
-    Texture2D texPaddle = InitTexture(0, 0, true);
-    LoadTextureFromFile(&texPaddle, "..\\assets\\paddle.png");
-    AddTextureToCache(texPaddle, "paddle", textureCache);
+    /* Texture2D texPaddle = InitTexture(0, 0, true); */
+    /* LoadTextureFromFile(&texPaddle, "..\\assets\\paddle.png"); */
+    /* AddTextureToCache(texPaddle, "paddle", textureCache); */
 
-    Texture2D texFloor = InitTexture(0, 0, true);
-    LoadTextureFromFile(&texFloor, "..\\assets\\floor.png");
-    AddTextureToCache(texFloor, "floor", textureCache);
+    Texture2D texBlock = LoadTextureFromFile("..\\assets\\block.png", true);
+    AddTextureToCache(texBlock, "block", textureCache);
 
     Game* game = new Game;
     game->state = GAME_ACTIVE;
@@ -77,7 +76,7 @@ Game* InitGame(uint32 width, uint32 height) {
     game->textureCache = textureCache;
     /* glm::vec2 playerPos = glm::vec2(width / 2.0f - PLAYER_SIZE.x / 2.0f, height - PLAYER_SIZE.y); */
     /* game.Player = InitGameObject(GetTextureFromCache(textureCache, "paddle"), playerPos, PLAYER_SIZE, glm::vec3(1.0f)); */
-    game->test = InitSprite(GetTextureFromCache(textureCache, "floor"), glm::vec2(100.0f, 100.0f), glm::vec2(130.0f, 130.0f), glm::vec3(1.0f));
+    game->test = InitSprite(GetTextureFromCache(textureCache, "block"), glm::vec2(100.0f, 100.0f), glm::vec2(130.0f, 130.0f), glm::vec3(1.0f));
     
     return game;
 }
