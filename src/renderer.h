@@ -17,6 +17,9 @@ void init_sprite_buffer(SpriteRenderer* renderer);
 
 SpriteRenderer* InitSpriteRenderer() {
     SpriteRenderer* renderer = new SpriteRenderer;
+    if (!renderer) {
+        Log::error("RENDERER: error wile allocating SpriteRenderer memory");
+    }
     renderer->VAO = 0;
 
     init_sprite_buffer(renderer);

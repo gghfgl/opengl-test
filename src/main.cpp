@@ -1,10 +1,7 @@
 #include <iostream>
 
-#include <glad/glad.h> // Remove with glfwWindowShouldClose().
-#include <GLFW/glfw3.h>
-
-#include "internal.h"
 #include "plateform.h"
+#include "opengl.h"
 #include "game.h"
 
 const unsigned int SCREEN_WIDTH = 1900;

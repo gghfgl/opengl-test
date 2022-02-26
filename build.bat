@@ -15,6 +15,6 @@ mkdir build
 pushd build
 
 rem cl /EHa -FC -WX -W4 -wd4201 -wd4100 -wd4505 -wd4189 -MTd -Zi "..\src\main.cpp" %GLADSRC% /I %GLFW3INC% /I %GLADINC% /I %GLMINC% /I %STBSRC% /link /LIBPATH:%GLFW3LIB% user32.lib gdi32.lib shell32.lib opengl32.lib glfw3.lib
-cl /EHa -FC -WX -wd4201 -wd4100 -wd4505 -wd4189 -MTd -Zi "..\src\main.cpp" %GLADSRC% /I %GLFW3INC% /I %GLADINC% /I %GLMINC% /I %STBSRC% /link /LIBPATH:%GLFW3LIB% user32.lib gdi32.lib shell32.lib opengl32.lib glfw3.lib
+cl -DDEBUG=1 /EHa -FC -WX -wd4201 -wd4100 -wd4505 -wd4189 -MTd -Zi "..\src\main.cpp" %GLADSRC% /I %GLFW3INC% /I %GLADINC% /I %GLMINC% /I %STBSRC% /link /LIBPATH:%GLFW3LIB% user32.lib gdi32.lib shell32.lib opengl32.lib glfw3.lib
 
 popd

@@ -15,6 +15,9 @@ struct Sprite {
 
 Sprite* InitSprite(Texture2D texture, glm::vec2 pos, glm::vec2 size, glm::vec3 color) {
     Sprite* sprite = new Sprite;
+    if (!sprite) {
+        Log::error("RENDERER: error wile allocating Sprite memory");
+    }
     sprite->position = pos;
     sprite->size = size;
     sprite->texture = texture;

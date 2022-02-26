@@ -46,25 +46,6 @@ Game* InitGame(uint32 width, uint32 height) {
     AddShaderToCache(spriteShader, "sprite", shaderCache);
 
     // Load textures.
-    /* Texture2D texFace = LoadTextureFromFile(&texFace, "..\\assets\\awesomeface.png", true); */
-    /* AddTextureToCache(texFace, "face", textureCache); */
-
-    /* Texture2D texBackground = InitTexture(0, 0, false); */
-    /* LoadTextureFromFile(&texBackground, "..\\assets\\background.jpg"); */
-    /* AddTextureToCache(texBackground, "background", textureCache); */
-
-    /* Texture2D texBrick = InitTexture(0, 0, false); */
-    /* LoadTextureFromFile(&texBrick, "..\\assets\\brick.png"); */
-    /* AddTextureToCache(texBrick, "brick", textureCache); */
-
-    /* Texture2D texBrickSolid = InitTexture(0, 0, false); */
-    /* LoadTextureFromFile(&texBrickSolid, "..\\assets\\brick_solid.png"); */
-    /* AddTextureToCache(texBrickSolid, "brick_solid", textureCache); */
-
-    /* Texture2D texPaddle = InitTexture(0, 0, true); */
-    /* LoadTextureFromFile(&texPaddle, "..\\assets\\paddle.png"); */
-    /* AddTextureToCache(texPaddle, "paddle", textureCache); */
-
     Texture2D texBlock = LoadTextureFromFile("..\\assets\\block.png", true);
     AddTextureToCache(texBlock, "block", textureCache);
 
