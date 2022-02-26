@@ -10,6 +10,13 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+enum ShaderType {
+    NONE     = -1,
+    VERTEX   =  0,
+    FRAGMENT =  1,
+    GEOMETRY =  2
+};
+
 struct Shader {
     uint32 ID;
 };

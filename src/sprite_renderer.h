@@ -9,23 +9,22 @@
 
 struct SpriteRenderer {
     Shader shader;
-    uint32 quadVAO;    
+    uint32 VAO;
 };
-
-void initRendererData(SpriteRenderer* renderer);
 
 SpriteRenderer InitSpriteRenderer(Shader shader) {
     SpriteRenderer renderer;
     renderer.shader = shader;
-    renderer.quadVAO = 0;
+    renderer.VAO = 0;
 
     return renderer;
 }
 
 void ClearSpriteRenderer(SpriteRenderer renderer) {
-    glDeleteVertexArrays(1, &renderer.quadVAO);    
+    glDeleteVertexArrays(1, &renderer.VAO);    
 }
 
+// @improve: Should take a sprite
 void DrawSprite(SpriteRenderer renderer, Texture2D &texture, glm::vec2 position, glm::vec2 size, float32 rotate, glm::vec3 color) {
     UseShader(renderer.shader);
     glm::mat4 model = glm::mat4(1.0f);
@@ -42,12 +41,12 @@ void DrawSprite(SpriteRenderer renderer, Texture2D &texture, glm::vec2 position,
     glActiveTexture(GL_TEXTURE0);
     BindTexture(&texture);
 
-    glBindVertexArray(renderer.quadVAO);
+    glBindVertexArray(renderer.VAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
 }
 
-void InitQuadVAO(SpriteRenderer* renderer) {
+void InitSpriteBuffer(SpriteRenderer* renderer) {
     uint32 VBO;
     float32 vertices[] = { 
         // pos      // tex
@@ -60,13 +59,13 @@ void InitQuadVAO(SpriteRenderer* renderer) {
         1.0f, 0.0f, 1.0f, 0.0f
     };
 
-    glGenVertexArrays(1, &renderer->quadVAO);
+    glGenVertexArrays(1, &renderer->VAO);
     glGenBuffers(1, &VBO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    glBindVertexArray(renderer->quadVAO);
+    glBindVertexArray(renderer->VAO);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float32), (void*)0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
