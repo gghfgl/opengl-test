@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <stdarg.h>
 
 typedef int8_t int8;
@@ -19,10 +20,10 @@ typedef double float64;
 
 #if DEBUG
 #define ASSERT(x) if (!(x)) __debugbreak();
+//#define ASSERT(x) if (!(x)) *(int*)0 = 0;
 #else
 #define ASSERT(x)
 #endif
-//#define ASSERT(x) if (!(x)) *(int*)0 = 0;
 
 namespace Log {
     void debug(const char* fmt, ...) {

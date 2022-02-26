@@ -40,9 +40,9 @@ Game* InitGame(uint32 width, uint32 height) {
     
     // Load and configure shaders.
     Shader spriteShader = LoadShaderFromFile("..\\shaders\\sprite.glsl");
-    UseShader(spriteShader);
-    SetShaderInteger(spriteShader, "image", 0);
-    SetShaderMatrix4(spriteShader, "projection", projection);
+    PLATEFORM::UseShader(spriteShader.ID);
+    PLATEFORM::SetShaderInteger(spriteShader.ID, "image", 0);
+    PLATEFORM::SetShaderMatrix4(spriteShader.ID, "projection", projection);
     AddShaderToCache(spriteShader, "sprite", shaderCache);
 
     // Load textures.
@@ -62,16 +62,12 @@ Game* InitGame(uint32 width, uint32 height) {
     return game;
 }
 
-void ProcessInput(Game* game, KeyboardEvent* keyboard, MouseEvent* mouse, float32 dt) {
+void ProcessInput(Game* game, PLATEFORM::KeyboardEvent* keyboard, PLATEFORM::MouseEvent* mouse, float32 dt) {
     if (keyboard->isPressed[keyboard::CRAP_KEY_ESCAPE])
         game->state = GAME_EXIT;
 }
 
-void Update(Game* game, float32 dt) {
-    // ...
-}
-
-void RenderGame(Game* game, SpriteRenderer* renderer) {
+void UpdateAndRender(Game* game, SpriteRenderer* renderer) {
     DrawSprite(renderer, game->test, GetShaderFromCache(game->shaderCache, "sprite"));
 
     /* if(game->State == GAME_ACTIVE) { */
@@ -88,4 +84,8 @@ void RenderGame(Game* game, SpriteRenderer* renderer) {
 
     /* Texture2D texFace = GetTextureFromCache(textureCache, "face"); */
     /* DrawSprite(game->Renderer, texFace, glm::vec2(200.0f, 200.0f), glm::vec2(300.0f, 400.0f), 45.0f, glm::vec3(0.0f, 1.0f, 0.0f)); */
+}
+
+void SoundSaple(Game* game) {
+    // ...
 }
