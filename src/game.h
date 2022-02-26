@@ -7,6 +7,7 @@
 #include "sprite.h"
 
 enum GameState {
+    GAME_EXIT,
     GAME_ACTIVE,
     GAME_MENU,
     GAME_WIN,
@@ -20,9 +21,7 @@ enum GameState {
 
 struct Game {
     GameState state;
-    // bool keys[1024]; @delete: Unused?
     uint32 width, height;
-
     std::map<std::string, Texture2D> textureCache;
     std::map<std::string, Shader> shaderCache;
 
@@ -36,12 +35,10 @@ Game* InitGame(uint32 width, uint32 height) {
     std::map<std::string, Shader> shaderCache;
     shaderCache.clear();
     
-    // load shaders
-    Shader spriteShader;
-    LoadShaderFromFile(&spriteShader, "..\\shaders\\sprite_vertex.glsl", "..\\shaders\\sprite_fragment.glsl");
+    // load and configure shaders
+    // Shader* spriteShader = LoadShaderFromFile(&spriteShader, "..\\shaders\\sprite_vertex.glsl", "..\\shaders\\sprite_fragment.glsl");
+    Shader spriteShader = LoadShaderFromFile("..\\shaders\\sprite.glsl");
     AddShaderToCache(spriteShader, "sprite", shaderCache);
-
-    // configure shader
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float32>(width), static_cast<float32>(height), 0.0f, -1.0f, 1.0f);
     UseShader(spriteShader);
     SetShaderInteger(spriteShader, "image", 0);
@@ -86,8 +83,8 @@ Game* InitGame(uint32 width, uint32 height) {
 }
 
 void ProcessInput(Game* game, KeyboardEvent* keyboard, MouseEvent* mouse, float32 dt) {
-    /* if (keyboard->isPressed[keyboard::CRAP_KEY_ESCAPE]) */
-    /*     glfwSetWindowShouldClose(window->context, true); // OPENGL CODE BAHHHHhh! */
+    if (keyboard->isPressed[keyboard::CRAP_KEY_ESCAPE])
+        game->state = GAME_EXIT;
 }
 
 void Update(Game* game, float32 dt) {

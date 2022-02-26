@@ -20,8 +20,7 @@ int main(int argc, char *argv[]) {
     // Memory arena for game assets.
     Game* demo = InitGame(window->width, window->height);
 
-    while (!glfwWindowShouldClose(window->context)) // @delete: Replace with GLOBAL STATE.
-    {
+    while (demo->state != GAME_EXIT) {
         // update delta time
         // -----------------
         UpdateFrameTime(time);

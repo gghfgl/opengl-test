@@ -14,7 +14,7 @@ enum ShaderType {
     NONE     = -1,
     VERTEX   =  0,
     FRAGMENT =  1,
-    GEOMETRY =  2
+    // GEOMETRY =  2
 };
 
 struct Shader {
@@ -68,7 +68,6 @@ void AddShaderToCache(Shader shader, std::string key, std::map<std::string, Shad
     cache[key] = shader;
 }
 
-// @remove: Seems useless code
 Shader GetShaderFromCache(std::map<std::string, Shader> &cache, std::string key) {
     return cache[key];
 }
@@ -78,34 +77,29 @@ void ClearShaderCache(std::map<std::string, Shader> &cache) {
         glDeleteProgram(iter.second.ID);
 }
 
-void LoadShaderFromFile(Shader* shader, const char *vertexShaderFile, const char *fragmentShaderFile) {
-    std::string vertexCode;
-    std::string fragmentCode;
+Shader LoadShaderFromFile(const char *filepath) {
+    std::ifstream stream(filepath);
+    std::string line;
+    std::stringstream ss[2];
+    ShaderType type = ShaderType::NONE;
 
-    // @improve: Learn the best way to open and read file
-    try {
-        std::ifstream vertexFile(vertexShaderFile);
-        std::ifstream fragmentFile(fragmentShaderFile);
-        std::stringstream vertexStream, fragmentStream;
-
-        vertexStream << vertexFile.rdbuf();
-        fragmentStream << fragmentFile.rdbuf();
-
-        vertexFile.close();
-        fragmentFile.close();
-
-        vertexCode = vertexStream.str();
-        fragmentCode = fragmentStream.str();
-    }
-    catch (std::exception e)
-    {
-        Log::error("SHADER: Failed to read shader files\n");
+    while (getline(stream, line)) {
+        if (line.find("#shader") != std::string::npos) {
+            if(line.find("vertex") != std::string::npos)
+                type = ShaderType::VERTEX;
+            else if(line.find("fragment") != std::string::npos)
+                type = ShaderType::FRAGMENT;
+        } else {
+            ss[(int)type] << line << '\n';
+        }
     }
 
-    const char *vertexSource = vertexCode.c_str();
-    const char *fragmentSource = fragmentCode.c_str();
+    Shader shader;
+    compileShaderSources(&shader, ss[(int)ShaderType::VERTEX].str().c_str(), ss[(int)ShaderType::FRAGMENT].str().c_str());
 
-    compileShaderSources(shader, vertexSource, fragmentSource);
+    Log::info("SHADER: success compile shader [%s]\n", filepath);
+
+    return shader;
 }
 
 void compileShaderSources(Shader* shader, const char* vertexSource, const char* fragmentSource) {
