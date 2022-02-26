@@ -12,15 +12,11 @@ enum GameState {
     GAME_WIN,
 };
 
-// @improve: Add to Game struct.
-std::map<std::string, Texture2D> TextureCache;
-std::map<std::string, Shader> ShaderCache;
-
 // @improve: Meh ... pass from the main call?
 // Initial size of the player paddle
-const glm::vec2 PLAYER_SIZE(100.0f, 20.0f);
+//const glm::vec2 PLAYER_SIZE(100.0f, 20.0f);
 // Initial velocity of the player paddle
-const float32 PLAYER_VELOCITY(500.0f);
+//const float32 PLAYER_VELOCITY(500.0f);
 
 struct Game {
     GameState state;
