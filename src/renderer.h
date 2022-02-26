@@ -15,12 +15,9 @@ struct SpriteRenderer {
 
 uint32 bind_sprite_buffer();
 
-SpriteRenderer* InitSpriteRenderer() {
-    SpriteRenderer* renderer = new SpriteRenderer;
-    if (!renderer) {
-        Log::error("RENDERER: error wile allocating SpriteRenderer memory");
-    }
-    renderer->VAO = bind_sprite_buffer();
+SpriteRenderer InitSpriteRenderer() {
+    SpriteRenderer renderer;
+    renderer.VAO = bind_sprite_buffer();
 
     return renderer;
 }

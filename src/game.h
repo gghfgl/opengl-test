@@ -26,10 +26,10 @@ struct Game {
     std::map<std::string, Shader> shaderCache;
 
     // @delete: Should be remove after tests. Nothing to do there!
-    Sprite* test;
+    Sprite test;
 };
 
-Game* InitGame(uint32 width, uint32 height) {
+Game InitGame(uint32 width, uint32 height) {
     std::map<std::string, Texture2D> textureCache;
     textureCache.clear();
     std::map<std::string, Shader> shaderCache;
@@ -49,15 +49,15 @@ Game* InitGame(uint32 width, uint32 height) {
     Texture2D texBlock = LoadTextureFromFile("..\\assets\\block.png", true);
     AddTextureToCache(texBlock, "block", textureCache);
 
-    Game* game = new Game;
-    game->state = GAME_ACTIVE;
-    game->width = width;
-    game->height = height;
-    game->shaderCache = shaderCache;
-    game->textureCache = textureCache;
+    Game game;
+    game.state = GAME_ACTIVE;
+    game.width = width;
+    game.height = height;
+    game.shaderCache = shaderCache;
+    game.textureCache = textureCache;
     /* glm::vec2 playerPos = glm::vec2(width / 2.0f - PLAYER_SIZE.x / 2.0f, height - PLAYER_SIZE.y); */
     /* game.Player = InitGameObject(GetTextureFromCache(textureCache, "paddle"), playerPos, PLAYER_SIZE, glm::vec3(1.0f)); */
-    game->test = InitSprite(GetTextureFromCache(textureCache, "block"), glm::vec2(100.0f, 100.0f), glm::vec2(130.0f, 130.0f), glm::vec3(1.0f));
+    game.test = InitSprite(GetTextureFromCache(textureCache, "block"), glm::vec2(100.0f, 100.0f), glm::vec2(130.0f, 130.0f), glm::vec3(1.0f));
     
     return game;
 }
@@ -68,7 +68,7 @@ void ProcessInput(Game* game, PLATEFORM::KeyboardEvent* keyboard, PLATEFORM::Mou
 }
 
 void UpdateAndRender(Game* game, SpriteRenderer* renderer) {
-    DrawSprite(renderer, game->test, GetShaderFromCache(game->shaderCache, "sprite"));
+    DrawSprite(renderer, &game->test, GetShaderFromCache(game->shaderCache, "sprite"));
 
     /* if(game->State == GAME_ACTIVE) { */
     /*     Texture2D texBackground = GetTextureFromCache(textureCache, "background"); */
