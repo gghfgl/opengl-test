@@ -24,9 +24,8 @@ SpriteRenderer* InitSpriteRenderer() {
     return renderer;
 }
 
-// @unused: Should be used right?
-void ClearSpriteRenderer(SpriteRenderer renderer) {
-    glDeleteVertexArrays(1, &renderer.VAO);    
+void ClearSpriteRenderer(SpriteRenderer* renderer) {
+    glDeleteVertexArrays(1, &renderer->VAO);    
 }
 
 void DrawSprite(SpriteRenderer* renderer, Sprite* sprite, Shader shader) {

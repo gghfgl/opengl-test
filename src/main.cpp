@@ -42,12 +42,13 @@ int main(int argc, char *argv[]) {
         SwapBuffer(window);
     }
 
-    TerminateWindow(window);
     delete(demo); // Clean memory arena ?
+    ClearSpriteRenderer(renderer);
     delete(renderer); // Clear VAO renderer?
     delete(time);
     delete(keyboard);
     delete(mouse);
+    TerminateWindow(window);
     delete(window);
 
     return 0;
