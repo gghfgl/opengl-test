@@ -15,10 +15,8 @@ typedef double float64;
 
 #define ASSERT(x) if (!(x)) __debugbreak();
 
-namespace Log
-{
-    void debug(const char* fmt, ...)
-    {
+namespace Log {
+    void debug(const char* fmt, ...) {
         std::string info = "[*DEBUG] ";
         info.append(fmt);
 
@@ -29,8 +27,7 @@ namespace Log
         va_end(args);
     }
 
-    void info(const char* fmt, ...)
-    {
+    void info(const char* fmt, ...) {
         std::string info = "[INFO] ";
         info.append(fmt);
 
@@ -40,8 +37,7 @@ namespace Log
         va_end(args);
     }
 
-    void warn(const char* fmt, ...)
-    {
+    void warn(const char* fmt, ...) {
         std::string info = "[WARN] ";
         info.append(fmt);
 
@@ -51,8 +47,7 @@ namespace Log
         va_end(args);
     }
 
-    void error(const char* fmt, ...)
-    {
+    void error(const char* fmt, ...) {
         std::string info = "[ERROR] ";
         info.append(fmt);
 
