@@ -36,7 +36,7 @@ Plateform_Window* InitWindow(uint32 width, uint32 height, const char *title) {
 
     GLFWwindow *glWindow = glfwCreateWindow((int)width, (int)height, title, nullptr, nullptr);
     glfwMakeContextCurrent(glWindow);
-    // glfwSwapInterval(1); // Vsync
+    glfwSwapInterval(1); // Vsync
 
     glfwSetKeyCallback(glWindow, keyboard_callback);
     glfwSetFramebufferSizeCallback(glWindow, framebuffer_size_callback);

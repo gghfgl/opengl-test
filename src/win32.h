@@ -71,9 +71,11 @@ namespace Log {
 
 struct Plateform_Memory {
     uint64 permanentStorageSize;
+    uint64 permanentStorageUsed;
     void* permanentStorage;
 
     uint64 transientStorageSize;
+    uint64 transientStorageUsed;
     void* transientStorage;
 
     bool isInitialized;
@@ -94,3 +96,17 @@ void AllocateMemory(Plateform_Memory* memory) {
 
     memory->isInitialized = true;
 }
+
+void PushToPermanentStorage(Plateform_Memory* memory, uint64 size) {
+    memory->permanentStorageUsed += size;
+}
+
+// *************** EXAMPLE ***************
+// Plateform_Memory gameMemory = {};
+// gameMemory.permanentStorageSize = MB(64);
+// gameMemory.transientStorageSize = MB(512);
+// //gameMemory.transientStorageSize = GB((uint64)4);
+// AllocateMemory(&gameMemory);
+
+// ASSERT(sizeof(Game) <= gameMemory.permanentStorageSize);
+// Game* demo = (Game*)gameMemory.permanentStorage;

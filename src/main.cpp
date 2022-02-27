@@ -10,19 +10,11 @@ int main(int argc, char *argv[]) {
     Plateform_KeyboardEvent* keyboard = InitKeyboardEvent();
     Plateform_MouseEvent* mouse = InitMouseEvent(SCREEN_WIDTH, SCREEN_HEIGHT);
     Plateform_FrameTime* time = InitFrameTime();
-
-    Plateform_Memory gameMemory = {};
-    gameMemory.permanentStorageSize = MB(64);
-    gameMemory.transientStorageSize = MB(512);
-    //gameMemory.transientStorageSize = GB((uint64)4);
-    AllocateMemory(&gameMemory);
-
-    ASSERT(sizeof(Game) <= gameMemory.permanentStorageSize);
-    Game* demo = (Game*)gameMemory.permanentStorage;
-    InitGameAndLoadAssets(demo, window->width, window->height);
+    
     SpriteRenderer renderer = InitSpriteRenderer();
+    Game demo = InitGameAndLoadAssets(window->width, window->height);
 
-    while (demo->state != GAME_EXIT) {
+    while (demo.state != GAME_EXIT) {
         // update delta time
         // -----------------
         UpdateFrameTime(time);
@@ -30,13 +22,19 @@ int main(int argc, char *argv[]) {
         // manage user input
         // -----------------
         PollEvents();
-        ProcessInput(demo, keyboard, mouse, time->deltaTime);
+        ProcessInput(&demo, keyboard, mouse, time->deltaTime);
 
         // update state and render
         // ------
         ClearBuffer();
-        UpdateAndRender(demo, &renderer);
+        UpdateAndRender(&demo, &renderer);
         SwapBuffer(window);
+
+        // memory tracker
+        // ------
+#if DEBUG
+        //PrintMemoryTrackerUsage(MEM_TRACK);
+#endif
     }
 
     ClearSpriteRenderer(&renderer);
