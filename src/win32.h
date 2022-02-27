@@ -1,5 +1,6 @@
 #pragma once
 
+#include <windows.h>
 #include <iostream>
 #include <stdarg.h>
 
@@ -14,9 +15,9 @@ typedef uint64_t uint64;
 typedef float float32;
 typedef double float64;
 
-#define KB(Value) ((Value)*1024);
-#define MB(Value) (KB(Value)*1024);
-#define GB(Value) (MB(Value)*1024);
+#define KB(Value) ((Value)*1024)
+#define MB(Value) (KB(Value)*1024)
+#define GB(Value) (MB(Value)*1024)
 
 #if DEBUG
 #define ASSERT(x) if (!(x)) __debugbreak();
@@ -66,4 +67,30 @@ namespace Log {
         vprintf(info.c_str(), args);
         va_end(args);
     }
+}
+
+struct Plateform_Memory {
+    uint64 permanentStorageSize;
+    void* permanentStorage;
+
+    uint64 transientStorageSize;
+    void* transientStorage;
+
+    bool isInitialized;
+};
+
+void AllocateMemory(Plateform_Memory* memory) {
+    memory->permanentStorage = VirtualAlloc(0, memory->permanentStorageSize, MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE);
+    if (!memory->permanentStorage) {
+        Log::error("MEMORY: Faild to alloc permanent storage memory with size: %d", memory->permanentStorageSize);
+        exit(666);
+    }
+
+    memory->transientStorage = VirtualAlloc(0, memory->transientStorageSize, MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE);
+    if (!memory->transientStorage) {
+        Log::error("MEMORY: Faild to alloc transient storage memory with size: %d", memory->transientStorageSize);
+        exit(666);
+    }
+
+    memory->isInitialized = true;
 }

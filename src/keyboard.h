@@ -1,6 +1,6 @@
 #pragma once
 
-namespace keyboard {
+namespace KEYBOARD {
     constexpr int CRAP_KEY_UNKNOWN = -1;
     constexpr int CRAP_KEY_SPACE = 32; 
     constexpr int CRAP_KEY_APOSTROPHE = 39;

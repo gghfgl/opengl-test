@@ -19,56 +19,51 @@ enum GameState {
 // Initial velocity of the player paddle
 //const float32 PLAYER_VELOCITY(500.0f);
 
+std::map<std::string, Shader> SHADER_CACHE;
+std::map<std::string, Texture2D> TEXTURE_CACHE;
+
 struct Game {
     GameState state;
     uint32 width, height;
-    std::map<std::string, Texture2D> textureCache;
-    std::map<std::string, Shader> shaderCache;
 
     // @delete: Should be remove after tests. Nothing to do there!
     Sprite test;
 };
 
-Game InitGame(uint32 width, uint32 height) {
-    std::map<std::string, Texture2D> textureCache;
-    textureCache.clear();
-    std::map<std::string, Shader> shaderCache;
-    shaderCache.clear();
+void InitGameAndLoadAssets(Game* game, uint32 width, uint32 height) {
+    SHADER_CACHE.clear();
+    TEXTURE_CACHE.clear();
 
     // Set projection.
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float32>(width), static_cast<float32>(height), 0.0f, -1.0f, 1.0f);
     
     // Load and configure shaders.
     Shader spriteShader = LoadShaderFromFile("..\\shaders\\sprite.glsl");
-    PLATEFORM::UseShader(spriteShader.ID);
-    PLATEFORM::SetShaderInteger(spriteShader.ID, "image", 0);
-    PLATEFORM::SetShaderMatrix4(spriteShader.ID, "projection", projection);
-    AddShaderToCache(spriteShader, "sprite", shaderCache);
+    UseShader(spriteShader.ID);
+    SetShaderInteger(spriteShader.ID, "image", 0);
+    SetShaderMatrix4(spriteShader.ID, "projection", projection);
+    AddShaderToCache(spriteShader, "sprite", SHADER_CACHE);
 
     // Load textures.
     Texture2D texBlock = LoadTextureFromFile("..\\assets\\block.png", true);
-    AddTextureToCache(texBlock, "block", textureCache);
+    AddTextureToCache(texBlock, "block", TEXTURE_CACHE);
 
-    Game game;
-    game.state = GAME_ACTIVE;
-    game.width = width;
-    game.height = height;
-    game.shaderCache = shaderCache;
-    game.textureCache = textureCache;
+    game->state = GAME_ACTIVE;
+    game->width = width;
+    game->height = height;
+
     /* glm::vec2 playerPos = glm::vec2(width / 2.0f - PLAYER_SIZE.x / 2.0f, height - PLAYER_SIZE.y); */
-    /* game.Player = InitGameObject(GetTextureFromCache(textureCache, "paddle"), playerPos, PLAYER_SIZE, glm::vec3(1.0f)); */
-    game.test = InitSprite(GetTextureFromCache(textureCache, "block"), glm::vec2(100.0f, 100.0f), glm::vec2(130.0f, 130.0f), glm::vec3(1.0f));
-    
-    return game;
+    /* game->Player = InitGameObject(GetTextureFromCache(textureCache, "paddle"), playerPos, PLAYER_SIZE, glm::vec3(1.0f)); */
+    game->test = InitSprite(GetTextureFromCache(TEXTURE_CACHE, "block"), glm::vec2(100.0f, 100.0f), glm::vec2(130.0f, 130.0f), glm::vec3(1.0f));
 }
 
-void ProcessInput(Game* game, PLATEFORM::KeyboardEvent* keyboard, PLATEFORM::MouseEvent* mouse, float32 dt) {
-    if (keyboard->isPressed[keyboard::CRAP_KEY_ESCAPE])
+void ProcessInput(Game* game, Plateform_KeyboardEvent* keyboard, Plateform_MouseEvent* mouse, float32 dt) {
+    if (keyboard->isPressed[KEYBOARD::CRAP_KEY_ESCAPE])
         game->state = GAME_EXIT;
 }
 
 void UpdateAndRender(Game* game, SpriteRenderer* renderer) {
-    DrawSprite(renderer, &game->test, GetShaderFromCache(game->shaderCache, "sprite"));
+    DrawSprite(renderer, &game->test, GetShaderFromCache(SHADER_CACHE, "sprite"));
 
     /* if(game->State == GAME_ACTIVE) { */
     /*     Texture2D texBackground = GetTextureFromCache(textureCache, "background"); */

@@ -6,33 +6,41 @@ const unsigned int SCREEN_WIDTH = 1900;
 const unsigned int SCREEN_HEIGHT = 1440;
 
 int main(int argc, char *argv[]) {
-    PLATEFORM::Window* window = PLATEFORM::InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "CrapEngine 2D");
-    PLATEFORM::KeyboardEvent* keyboard = PLATEFORM::InitKeyboardEvent();
-    PLATEFORM::MouseEvent* mouse = PLATEFORM::InitMouseEvent(SCREEN_WIDTH, SCREEN_HEIGHT);
-    PLATEFORM::FrameTime* time = PLATEFORM::InitFrameTime();
+    Plateform_Window* window = InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "CrapEngine 2D");
+    Plateform_KeyboardEvent* keyboard = InitKeyboardEvent();
+    Plateform_MouseEvent* mouse = InitMouseEvent(SCREEN_WIDTH, SCREEN_HEIGHT);
+    Plateform_FrameTime* time = InitFrameTime();
 
+    Plateform_Memory gameMemory = {};
+    gameMemory.permanentStorageSize = MB(64);
+    gameMemory.transientStorageSize = MB(512);
+    //gameMemory.transientStorageSize = GB((uint64)4);
+    AllocateMemory(&gameMemory);
+
+    ASSERT(sizeof(Game) <= gameMemory.permanentStorageSize);
+    Game* demo = (Game*)gameMemory.permanentStorage;
+    InitGameAndLoadAssets(demo, window->width, window->height);
     SpriteRenderer renderer = InitSpriteRenderer();
-    Game demo = InitGame(window->width, window->height); // @improve: Memory arena for game assets.
 
-    while (demo.state != GAME_EXIT) {
+    while (demo->state != GAME_EXIT) {
         // update delta time
         // -----------------
-        PLATEFORM::UpdateFrameTime(time);
+        UpdateFrameTime(time);
 
         // manage user input
         // -----------------
-        PLATEFORM::PollEvents();
-        ProcessInput(&demo, keyboard, mouse, time->deltaTime);
+        PollEvents();
+        ProcessInput(demo, keyboard, mouse, time->deltaTime);
 
         // update state and render
         // ------
-        PLATEFORM::ClearBuffer();
-        UpdateAndRender(&demo, &renderer);
-        PLATEFORM::SwapBuffer(window);
+        ClearBuffer();
+        UpdateAndRender(demo, &renderer);
+        SwapBuffer(window);
     }
 
     ClearSpriteRenderer(&renderer);
-    PLATEFORM::TerminateWindow(window);
+    TerminateWindow(window);
     delete(time);
     delete(keyboard);
     delete(mouse);

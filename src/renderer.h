@@ -17,6 +17,8 @@ uint32 bind_sprite_buffer();
 
 SpriteRenderer InitSpriteRenderer() {
     SpriteRenderer renderer;
+
+    // @improve: Meh, hidden behaviour
     renderer.VAO = bind_sprite_buffer();
 
     return renderer;
@@ -24,7 +26,7 @@ SpriteRenderer InitSpriteRenderer() {
 
 // @improve: Useless? Maybe call directly plateform API.
 void ClearSpriteRenderer(SpriteRenderer* renderer) {
-    PLATEFORM::DeleteVertexArrays(&renderer->VAO);    
+    DeleteVertexArrays(&renderer->VAO);    
 }
 
 void DrawSprite(SpriteRenderer* renderer, Sprite* sprite, Shader shader) {
@@ -36,12 +38,12 @@ void DrawSprite(SpriteRenderer* renderer, Sprite* sprite, Shader shader) {
     model = glm::translate(model, glm::vec3(-0.5f * sprite->size.x, -0.5f * sprite->size.y, 0.0f)); // move origin back
     model = glm::scale(model, glm::vec3(sprite->size, 1.0f)); // last scale
 
-    PLATEFORM::UseShader(shader.ID);
-    PLATEFORM::SetShaderMatrix4(shader.ID, "model", model);
-    PLATEFORM::SetShaderVector3f(shader.ID, "spriteColor", sprite->color);
+    UseShader(shader.ID);
+    SetShaderMatrix4(shader.ID, "model", model);
+    SetShaderVector3f(shader.ID, "spriteColor", sprite->color);
 
-    PLATEFORM::BindTexture(sprite->texture.ID);
-    PLATEFORM::DrawVertexArraysTriangles(renderer->VAO);
+    BindTexture(sprite->texture.ID);
+    DrawVertexArraysTriangles(renderer->VAO);
 }
 
 uint32 bind_sprite_buffer() {
@@ -56,7 +58,7 @@ uint32 bind_sprite_buffer() {
         1.0f, 0.0f, 1.0f, 0.0f
     };
 
-    uint32 VAO = PLATEFORM::BindVertexArraysFloat(vertices, (uint32)sizeof(vertices), 4);
+    uint32 VAO = BindVertexArraysFloat(vertices, (uint32)sizeof(vertices), 4);
 
     return VAO;
 }

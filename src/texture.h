@@ -18,20 +18,20 @@ Texture2D LoadTextureFromFile(const char *file, bool alpha) {
         Log::error("TEXTURE: Failed to load image from file: %s\n", file);
     }
 
-    uint32 internalFormat = PLATEFORM::RGB;
-    uint32 imageFormat = PLATEFORM::RGB;
-    uint32 wrapAxisS = PLATEFORM::REPEAT;
-    uint32 wrapAxisT = PLATEFORM::REPEAT;
-    uint32 filterMin = PLATEFORM::LINEAR;
-    uint32 filterMax = PLATEFORM::LINEAR;
+    uint32 internalFormat = PLATEFORM_RGB;
+    uint32 imageFormat = PLATEFORM_RGB;
+    uint32 wrapAxisS = PLATEFORM_REPEAT;
+    uint32 wrapAxisT = PLATEFORM_REPEAT;
+    uint32 filterMin = PLATEFORM_LINEAR;
+    uint32 filterMax = PLATEFORM_LINEAR;
 
     if (alpha) {
-        internalFormat = PLATEFORM::RGBA;
-        imageFormat = PLATEFORM::RGBA;
+        internalFormat = PLATEFORM_RGBA;
+        imageFormat = PLATEFORM_RGBA;
     }
 
     Texture2D texture;
-    texture.ID = PLATEFORM::GenerateTexture(width, height, internalFormat, imageFormat, wrapAxisS, wrapAxisT, filterMin, filterMax, data);
+    texture.ID = GenerateTexture(width, height, internalFormat, imageFormat, wrapAxisS, wrapAxisT, filterMin, filterMax, data);
     stbi_image_free(data);
 
     return texture;
@@ -48,5 +48,5 @@ Texture2D GetTextureFromCache(std::map<std::string, Texture2D> &cache, std::stri
 
 void ClearTextureCache(std::map<std::string, Texture2D> &cache) {
     for (auto iter : cache)
-        PLATEFORM::DeleteTexture(&iter.second.ID);
+        DeleteTexture(&iter.second.ID);
 }

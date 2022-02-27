@@ -27,7 +27,7 @@ Shader GetShaderFromCache(std::map<std::string, Shader> &cache, std::string key)
 
 void ClearShaderCache(std::map<std::string, Shader> &cache) {
     for (auto iter : cache)
-        PLATEFORM::DeleteShader(iter.second.ID);
+        DeleteShader(iter.second.ID);
 }
 
 Shader LoadShaderFromFile(const char *filepath) {
@@ -48,7 +48,7 @@ Shader LoadShaderFromFile(const char *filepath) {
     }
 
     Shader shader;
-    shader.ID = PLATEFORM::CompileShaderSources(ss[(int)ShaderType::VERTEX].str().c_str(), ss[(int)ShaderType::FRAGMENT].str().c_str());
+    shader.ID = CompileShaderSources(ss[(int)ShaderType::VERTEX].str().c_str(), ss[(int)ShaderType::FRAGMENT].str().c_str());
 
     Log::info("SHADER: success compile shader [%s]\n", filepath);
 
