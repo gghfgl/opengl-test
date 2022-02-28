@@ -57,6 +57,8 @@ Plateform_Window* InitWindow(uint32 width, uint32 height, const char *title) {
     glViewport(0, 0, width, height);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //glPolygonMode(GL_FRONT_AND_BACK, (GL_LINE));
+    //glPolygonMode(GL_FRONT_AND_BACK, (GL_FILL));
 
     glEnable(GL_DEBUG_OUTPUT);
     glDebugMessageCallback(debug_message_callback, 0);

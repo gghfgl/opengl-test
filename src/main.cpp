@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
         // update state and render
         // ------
         ClearBuffer();
-        UpdateAndRender(&demo, &renderer);
+        UpdateAndRender(&demo, &renderer, mouse);
         SwapBuffer(window);
 
         // memory tracker

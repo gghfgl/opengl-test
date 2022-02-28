@@ -6,21 +6,6 @@
 #include "renderer.h"
 #include "sprite.h"
 
-// @improve: Make a custom memory allocator to be able to track real memory usage.
-struct MemoryTracker {
-    std::map<std::string, Shader> *shaderCache;
-    std::map<std::string, Texture2D> *textureCache;
-};
-
-void PrintMemoryTrackerUsage(MemoryTracker* mt) {
-    uint64 sCache = mt->shaderCache->size() * (sizeof(std::string) + sizeof(Shader));
-    uint64 tCache = mt->textureCache->size() * (sizeof(std::string) + sizeof(Texture2D));
-
-    Log::info("MEMORY: shader_cache: %d Bytes | texture_cache: %d Bytes\n", sCache, tCache);
-}
-
-MemoryTracker* MEM_TRACK;
-
 std::map<std::string, Shader> SHADER_CACHE;
 std::map<std::string, Texture2D> TEXTURE_CACHE;
 
@@ -34,17 +19,11 @@ enum GameState {
 struct Game {
     GameState state;
     uint32 width, height;
-
-    // @delete: Should be remove after tests. Nothing to do there!
-    std::vector<Sprite> testList;
 };
 
 Game InitGameAndLoadAssets(uint32 width, uint32 height) {
     SHADER_CACHE.clear();
     TEXTURE_CACHE.clear();
-    MEM_TRACK = new MemoryTracker;
-    MEM_TRACK->shaderCache = &SHADER_CACHE;
-    MEM_TRACK->textureCache = &TEXTURE_CACHE;
 
     // Set projection.
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float32>(width), static_cast<float32>(height), 0.0f, -1.0f, 1.0f);
@@ -60,29 +39,16 @@ Game InitGameAndLoadAssets(uint32 width, uint32 height) {
     Texture2D texBlock = LoadTextureFromFile("..\\assets\\block.png", true);
     AddTextureToCache(texBlock, "block", TEXTURE_CACHE);
 
+    Texture2D texBlock2 = LoadTextureFromFile("..\\assets\\block2.png", true);
+    AddTextureToCache(texBlock2, "block2", TEXTURE_CACHE);
+
+    Texture2D texBlock3 = LoadTextureFromFile("..\\assets\\block3.png", true);
+    AddTextureToCache(texBlock3, "block3", TEXTURE_CACHE);
+
     Game game;
     game.state = GAME_ACTIVE;
     game.width = width;
     game.height = height;
-    game.testList.clear();
-
-    uint32 size = 20;
-    float32 spriteSize = 100.0f;
-    float32 startPosX = (float32)(width/2) - (spriteSize/2);
-    float32 startPosY = 300.0f;
-    for (uint32 i=0; i<size; i++) {
-        for (uint32 y=0; y<size; y++) {
-            float32 posX = startPosX + (float32)(spriteSize/2 * y);
-            float32 posY = startPosY + (float32)((spriteSize/4) * y);
-            game.testList.push_back(InitSprite(GetTextureFromCache(TEXTURE_CACHE, "block"),
-                                               glm::vec2(posX, posY),
-                                               glm::vec2(spriteSize),
-                                               glm::vec3(1.0f)));
-        }
-
-        startPosX -= (spriteSize/2);
-        startPosY += (spriteSize/4);
-    }
 
     return game;
 }
@@ -92,27 +58,74 @@ void ProcessInput(Game* game, Plateform_KeyboardEvent* keyboard, Plateform_Mouse
         game->state = GAME_EXIT;
 }
 
-void UpdateAndRender(Game* game, SpriteRenderer* renderer) {
-    // @improve: Should avoid as many drawcalls! Batch rendering?
-    for(std::size_t i = 0; i < game->testList.size(); ++i)
-        DrawSprite(renderer, &game->testList[i], GetShaderFromCache(SHADER_CACHE, "sprite"));
-
-    /* if(game->State == GAME_ACTIVE) { */
-    /*     Texture2D texBackground = GetTextureFromCache(textureCache, "background"); */
-    /*     DrawSprite(game->Renderer, texBackground, glm::vec2(0.0f, 0.0f), glm::vec2(game->Width, game->Height), 0.0f, glm::vec3(1.0f)); */
-
-    /*     for (GameObject &tile : game->Levels[game->CurrentLevelIdx].Bricks) */
-    /*         if (!tile.Destroyed) { */
-    /*             DrawSprite(game->Renderer, tile.Sprite, tile.Position, tile.Size, tile.Rotation, tile.Color); */
-    /*         } */
-
-    /*     DrawSprite(game->Renderer, game->Player.Sprite, game->Player.Position, game->Player.Size, game->Player.Rotation, game->Player.Color); */
-    /* } */
-
-    /* Texture2D texFace = GetTextureFromCache(textureCache, "face"); */
-    /* DrawSprite(game->Renderer, texFace, glm::vec2(200.0f, 200.0f), glm::vec2(300.0f, 400.0f), 45.0f, glm::vec3(0.0f, 1.0f, 0.0f)); */
+void SoundSample(Game* game) {
+    // ...
 }
 
-void SoundSaple(Game* game) {
-    // ...
+/* glm::vec2 worldToScreen(glm::vec2 originWorld, uint32 x, uint32 y, uint32 size) { */
+/*     float32 screenX = (originWorld.x * size) + (x - y) * (size / 2); */
+/*     float32 screenY = (originWorld.y * size) + (x + y) * (size / 2); */
+
+/*     return glm::vec2(screenX, screenY); */
+/* } */
+
+glm::vec2 worldToScreen(uint32 x, uint32 y, uint32 tileSize) {
+    glm::vec2 screenPos(0.0f);
+
+    float32 posX = (float32)(x*tileSize);
+    float32 posY = (float32)(y*tileSize);
+
+    screenPos.x = (posX - posY) / 2;
+    screenPos.y = (posX + posY) / 4;
+
+    return screenPos;
+}
+
+void UpdateAndRender(Game* game, SpriteRenderer* renderer, Plateform_MouseEvent* mouse) {
+    std::vector<Sprite> testList;
+    testList.clear();
+
+    uint32 sizeX = 10;
+    uint32 sizeY = 14;
+    uint32 spriteSize = 100;
+    //glm::vec2 cellCoordIso = glm::vec2(game->width / spriteSize, game->height / spriteSize); // 19,14
+    glm::vec2 origin = glm::vec2((float32)((game->width/2) - (spriteSize/2)), (float32)((game->height/3) - (spriteSize/2)));
+
+
+    //printf("mouse %.1f/%.1f\n", mouse->posX, mouse->posY);
+    // 2. get cell from world space the mouse pos is in: (mouse.x / spriteSize) (mouse.y / spriteSze)
+    glm::vec2 cell = glm::vec2((float32)(mouse->posX / spriteSize), (float32)(mouse->posY / spriteSize));
+    printf("cell %d/%d\n", (uint32)(cell.x), (uint32)(cell.y));
+
+    // 3. get offset into the cell: (mouse.x % spriteSize) (mouse.y % spriteSize)
+    //glm::vec2 cellOffset = glm::vec2(mouse->posX % spriteSize, mouse->posY % spriteSize);
+    // .. Current cell hovered: (cell.x * spriteSize) (cell.y * spriteSize)
+    // 4. Selected cell: (cell.y - origin.y) + (cell.x - origin.x)
+    //                   (cell.y - origin.y) - (cell.x - origin.x)
+    glm::vec2 selectCell = glm::vec2((cell.y - origin.y) + (cell.x - origin.x), (cell.y - origin.y) - (cell.x - origin.x));
+
+    for (uint32 y=0; y<sizeY; y++) {
+        for (uint32 x=0; x<sizeX; x++) {
+            glm::vec2 screenPos = worldToScreen(x, y, spriteSize);
+            testList.push_back(InitSprite(GetTextureFromCache(TEXTURE_CACHE, "block"),
+                                          glm::vec2(origin.x + screenPos.x, origin.y + screenPos.y),
+                                          glm::vec2((float32)spriteSize),
+                                          glm::vec3(1.0f)));
+        }
+    }
+
+
+
+// @improve: Should avoid as many drawcalls! Batch rendering?
+    for(std::size_t i = 0; i < testList.size(); ++i)
+        DrawSprite(renderer, &testList[i], GetShaderFromCache(SHADER_CACHE, "sprite"));
+
+    // 5. selected World = selectedCell worldToScreen convert
+    glm::vec2 selectedCellPos = worldToScreen((uint32)(mouse->posX / spriteSize), (uint32)(mouse->posY / spriteSize), spriteSize);
+    // 6. Draw block 2 at this pos.
+    Sprite selected = InitSprite(GetTextureFromCache(TEXTURE_CACHE, "block2"),
+               glm::vec2(origin.x + selectedCellPos.x, origin.y + selectedCellPos.y),
+               glm::vec2((float32)spriteSize),
+               glm::vec3(1.0f));
+    DrawSprite(renderer, &selected, GetShaderFromCache(SHADER_CACHE, "sprite"));
 }

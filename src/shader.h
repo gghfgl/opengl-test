@@ -50,7 +50,7 @@ Shader LoadShaderFromFile(const char *filepath) {
     Shader shader;
     shader.ID = CompileShaderSources(ss[(int)ShaderType::VERTEX].str().c_str(), ss[(int)ShaderType::FRAGMENT].str().c_str());
 
-    Log::info("SHADER: success compile shader [%s]\n", filepath);
+    Log::info("SHADER: compile success [%s]\n", filepath);
 
     return shader;
 }
