@@ -169,7 +169,7 @@ Plateform_MouseEvent* InitMouseEvent(uint32 width, uint32 height) {
     return PLATEFORM_MOUSE_EVENT;
 }
 
-// @check: Is it usefull?
+// @improve: Check left click here?
 void UpdateMouseOffsets(Plateform_MouseEvent* mouse) {
     if (mouse->leftButtonFirstClick) {
         mouse->lastX = mouse->posX;
@@ -184,7 +184,6 @@ void UpdateMouseOffsets(Plateform_MouseEvent* mouse) {
     mouse->lastY = mouse->posY;
 }
 
-// @check: Is it usefull?
 float32 GetMouseScrollOffsetY(Plateform_MouseEvent* mouse) {
     float32 rValue = (float32)mouse->scrollOffsetY;
     mouse->scrollOffsetY = 0.0f;
