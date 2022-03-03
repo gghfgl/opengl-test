@@ -122,10 +122,11 @@ void ProcessInput(Game* game, Plateform_KeyboardEvent* keyboard, Plateform_Mouse
     if (mouse->scrollOffsetY != 0.0f) {
         printf("scroll offset %.1f\n", mouse->scrollOffsetY);
         float32 scrollOffset = GetMouseScrollOffsetY(mouse);
-        if (scrollOffset > 0.0f)
+        if (scrollOffset > 0.0f) {
             game->camera.zoom += .05f;
-        else
+        } else {
             game->camera.zoom -= .05f;
+        }
 
         //game->camera.zoomMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(game->camera.zoom));
         //game->camera.projection = glm::ortho(game->camera.zoom, (float32)game->width, (float32)game->height, game->camera.zoom, -10.0f, 1.0f);
@@ -185,8 +186,8 @@ void UpdateAndRender(Game* game, SpriteRenderer* renderer, Plateform_MouseEvent*
     }
 
     // Mouse world position
-    glm::vec2 mouseWorld = screenToWorld((float32)(mouse->posX - game->origin.x + game->camera.position.x),
-                                         (float32)(mouse->posY - game->origin.y + game->camera.position.y),
+    glm::vec2 mouseWorld = screenToWorld((float32)((mouse->posX/game->camera.zoom) - game->origin.x + (game->camera.position.x/game->camera.zoom)),
+                                         (float32)((mouse->posY/game->camera.zoom) - game->origin.y + (game->camera.position.y/game->camera.zoom)),
                                          (uint32)game->hoveredSprite.size.x);
     printf("mouse world %.1f/%.1f\n", mouseWorld.x, mouseWorld.y);
 
