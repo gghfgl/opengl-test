@@ -6,6 +6,7 @@
 #include "shader.h"
 #include "texture.h"
 #include "sprite.h"
+#include "game.h"
 
 
 struct SpriteRenderer {
@@ -29,7 +30,7 @@ void ClearSpriteRenderer(SpriteRenderer* renderer) {
     DeleteVertexArrays(&renderer->VAO);    
 }
 
-void DrawSprite(SpriteRenderer* renderer, Sprite* sprite, Shader shader, glm::mat4 projection, glm::vec2 position, glm::mat4 zoomMatrix, float32 zoom) {
+void DrawSprite(SpriteRenderer* renderer, Sprite* sprite, Shader shader, Camera* camera) {
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(sprite->position, 1.0f));  // first translate (transformations are: scale happens first, then rotation, and then final translation happens; reversed order)
 
@@ -38,14 +39,28 @@ void DrawSprite(SpriteRenderer* renderer, Sprite* sprite, Shader shader, glm::ma
     model = glm::translate(model, glm::vec3(-0.5f * sprite->size.x, -0.5f * sprite->size.y, 0.0f)); // move origin back
     model = glm::scale(model, glm::vec3(sprite->size, 1.0f)); // last scale
 
-    glm::mat4 lookAt = glm::lookAt(glm::vec3(position.x, position.y, 0.0f),
-                                   glm::vec3(position.x, position.y, -1.0f),
-                                   glm::vec3(0.0f, 1.0f, 0.0f));
-    lookAt *= glm::scale(glm::mat4(1.0f), glm::vec3(zoom, zoom, 1.0f)); // last scale
+    /* glm::mat4 lookAt = glm::lookAt(glm::vec3(camera->position.x, camera->position.y, 0.0f), */
+    /*                                glm::vec3(camera->position.x, camera->position.y, -1.0f), */
+    /*                                glm::vec3(0.0f, 1.0f, 0.0f)); */
+    /* lookAt *= glm::scale(glm::mat4(1.0f), glm::vec3(zoom, zoom, 1.0f)); */
+    
+    float32 xPos = camera->width/2 + camera->position.x;
+    float32 yPos = camera->height/2 + camera->position.y;
+    float32 left = -camera->width/(2*camera->zoom) + xPos;
+    float32 right = camera->width/(2*camera->zoom) + xPos; //
+    float32 top = -camera->height/(2*camera->zoom) + yPos;
+    float32 bottom = camera->height/(2*camera->zoom) + yPos; //
+
+    glm::mat4 projection = glm::ortho(left, right, bottom, top, -1.0f, 1.0f);
+    /* glm::mat4 projection = glm::ortho(0.0f, */
+    /*                                   camera->width/(1*camera->zoom) + camera->position.x, */
+    /*                                   camera->height/(1*camera->zoom) + camera->position.y, */
+    /*                                   0.0f, */
+    /*                                   -1.0f, 1.0f); */
 
     UseShader(shader.ID);
-    SetShaderMatrix4(shader.ID, "view", lookAt);
     SetShaderMatrix4(shader.ID, "projection", projection);
+    //SetShaderMatrix4(shader.ID, "view", lookAt);
     SetShaderMatrix4(shader.ID, "model", model);
     SetShaderVector3f(shader.ID, "spriteColor", sprite->color);
 

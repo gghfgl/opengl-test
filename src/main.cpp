@@ -1,5 +1,6 @@
 #include "win32.h"
 #include "opengl.h"
+#include "camera.h"
 #include "game.h"
 
 const unsigned int SCREEN_WIDTH = 1900;
@@ -12,6 +13,9 @@ int main(int argc, char *argv[]) {
     Plateform_FrameTime* time = InitFrameTime();
     
     SpriteRenderer renderer = InitSpriteRenderer();
+    Camera camera = InitCamera((float32)window->width,
+                               (float32)window->height,
+                               glm::vec3(0.0f, 0.0f, 0.0f));
     Game demo = InitGameAndLoadAssets(window->width, window->height);
 
     while (demo.state != GAME_EXIT) {
@@ -22,12 +26,12 @@ int main(int argc, char *argv[]) {
         // manage user input
         // -----------------
         PollEvents();
-        ProcessInput(&demo, keyboard, mouse, time->deltaTime);
+        ProcessInput(&demo, &camera, keyboard, mouse, time->deltaTime);
 
         // update state and render
         // ------
         ClearBuffer();
-        UpdateAndRender(&demo, &renderer, mouse);
+        UpdateAndRender(&demo, &camera, &renderer, mouse);
         SwapBuffer(window);
 
         // memory tracker

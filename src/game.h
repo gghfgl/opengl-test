@@ -12,25 +12,6 @@ glm::vec2 screenToWorld(float32 x, float32 y, uint32 tileSize);
 std::map<std::string, Shader> SHADER_CACHE;
 std::map<std::string, Texture2D> TEXTURE_CACHE;
 
-enum CameraDirection {
-    CAMERA_FORWARD,
-    CAMERA_BACKWARD,
-    CAMERA_LEFT,
-    CAMERA_RIGHT,
-    CAMERA_UP,
-    CAMERA_DOWN
-};
-
-struct Camera {
-    glm::mat4 projection;
-    glm::vec2 position;
-    glm::mat4 zoomMatrix;
-    glm::vec2 aspect;
-
-    float32 speed;
-    float32 zoom;
-};
-
 enum GameState {
     GAME_EXIT,
     GAME_ACTIVE,
@@ -41,10 +22,9 @@ enum GameState {
 struct Game {
     GameState state;
     uint32 width, height;
-
-    Camera camera;
     glm::vec2 origin;
     glm::uvec2 world;
+
     std::vector<Sprite> testList;
     Sprite hoveredSprite;
 };
@@ -53,21 +33,10 @@ Game InitGameAndLoadAssets(uint32 width, uint32 height) {
     SHADER_CACHE.clear();
     TEXTURE_CACHE.clear();
 
-    // Set projection.
-    Camera camera;
-    camera.position = glm::vec2(0.0f);
-    camera.speed = 20.0f;
-    camera.zoom = 1.0f;
-    camera.zoomMatrix = glm::mat4(1.0f);
-    camera.aspect = glm::vec2(0.0f);
-
-    camera.projection = glm::ortho(0.0f, (float32)width, (float32)height, 0.0f, -10.0f, 1.0f);
-    
     // Load and configure shaders.
     Shader spriteShader = LoadShaderFromFile("..\\shaders\\sprite.glsl");
     UseShader(spriteShader.ID);
     SetShaderInteger(spriteShader.ID, "image", 0);
-    SetShaderMatrix4(spriteShader.ID, "projection", camera.projection);
     AddShaderToCache(spriteShader, "sprite", SHADER_CACHE);
 
     // Load textures.
@@ -92,11 +61,12 @@ Game InitGameAndLoadAssets(uint32 width, uint32 height) {
     game.height = height;
 
     // Tests
-    game.camera = camera;
-    game.world.x = 10;
-    game.world.y = 14;
+    game.world.x = 20;
+    game.world.y = 20;
     uint32 spriteSize = 100;
-    game.origin = glm::vec2((float32)(width/2), (float32)(height/3));
+    game.origin = glm::vec2((float32)(width/2), (float32)(height/2));
+    //game.origin = glm::vec2((float32)(width), (float32)(height));
+    //game.origin = glm::vec2(0.0f);
     game.testList.clear();
 
     for (uint32 y=0; y<game.world.y; y++) {
@@ -117,40 +87,25 @@ Game InitGameAndLoadAssets(uint32 width, uint32 height) {
     return game;
 }
 
-void ProcessInput(Game* game, Plateform_KeyboardEvent* keyboard, Plateform_MouseEvent* mouse, float32 dt) {
-    // test scroll
+void ProcessInput(Game* game, Camera* camera, Plateform_KeyboardEvent* keyboard, Plateform_MouseEvent* mouse, float32 deltaTime) {
     if (mouse->scrollOffsetY != 0.0f) {
-        printf("scroll offset %.1f\n", mouse->scrollOffsetY);
-        float32 scrollOffset = GetMouseScrollOffsetY(mouse);
-        if (scrollOffset > 0.0f) {
-            game->camera.zoom += .05f;
+        if (GetMouseScrollOffsetY(mouse) > 0.0f) {
+            camera->zoom += .05f;
+            //UpdateCameraPositionZAxis(camera, CAMERA_FORWARD, deltaTime);
         } else {
-            game->camera.zoom -= .05f;
+            camera->zoom -= .05f;
         }
-
-        //game->camera.zoomMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(game->camera.zoom));
-        //game->camera.projection = glm::ortho(game->camera.zoom, (float32)game->width, (float32)game->height, game->camera.zoom, -10.0f, 1.0f);
-
     }
 
+    float32 velocity = camera->speed * 1.0f * deltaTime;
     if (mouse->leftButton) {
         UpdateMouseOffsets(mouse);
-        game->camera.position.x -= mouse->offsetX;
-        game->camera.position.y += mouse->offsetY;
+        camera->position.x -= mouse->offsetX / camera->zoom * velocity;
+        camera->position.y += mouse->offsetY / camera->zoom * velocity;
     }
 
-    float32 acceleration = 1.0f;
-    float32 velocity = game->camera.speed * acceleration * dt;
     if (keyboard->isPressed[KEYBOARD::CRAP_KEY_ESCAPE])
         game->state = GAME_EXIT;
-    if (keyboard->isPressed[KEYBOARD::CRAP_KEY_LEFT])
-        game->camera.position.x += 10.0f * velocity;
-    if (keyboard->isPressed[KEYBOARD::CRAP_KEY_RIGHT])
-        game->camera.position.x -= 10.0f * velocity;
-    if (keyboard->isPressed[KEYBOARD::CRAP_KEY_UP])
-        game->camera.position.y += 10.0f * velocity;
-    if (keyboard->isPressed[KEYBOARD::CRAP_KEY_DOWN])
-        game->camera.position.y -= 10.0f * velocity;
 }
 
 void SoundSample(Game* game) {
@@ -176,29 +131,30 @@ glm::vec2 screenToWorld(float32 x, float32 y, uint32 tileSize) {
     return world;
 }
 
-void UpdateAndRender(Game* game, SpriteRenderer* renderer, Plateform_MouseEvent* mouse) {
-    printf("zoom %.1f\n", game->camera.zoom);
-    printf("mous %.1f | %.1f\n", mouse->posX, mouse->posY);
+void UpdateAndRender(Game* game, Camera* camera, SpriteRenderer* renderer, Plateform_MouseEvent* mouse) {
+    printf("zoom %.1f\n", camera->zoom);
+    printf("cam pos %.1f | %.1f\n", camera->position.x, camera->position.y);
+    printf("mouse pos %.1f | %.1f\n", mouse->posX, mouse->posY);
 
 	// @improve: Should avoid as many drawcalls! Batch rendering?
-    for(std::size_t i = 0; i < game->testList.size(); ++i) {        
-        DrawSprite(renderer, &game->testList[i], GetShaderFromCache(SHADER_CACHE, "sprite"), game->camera.projection, game->camera.position, game->camera.zoomMatrix, game->camera.zoom);
+    for(std::size_t i = 0; i < game->testList.size(); ++i) {
+        DrawSprite(renderer, &game->testList[i], GetShaderFromCache(SHADER_CACHE, "sprite"), camera);
     }
 
     // Mouse world position
-    glm::vec2 mouseWorld = screenToWorld((float32)((mouse->posX/game->camera.zoom) - game->origin.x + (game->camera.position.x/game->camera.zoom)),
-                                         (float32)((mouse->posY/game->camera.zoom) - game->origin.y + (game->camera.position.y/game->camera.zoom)),
+    glm::vec2 mouseWorld = screenToWorld((float32)((mouse->posX - game->origin.x) / camera->zoom + camera->position.x),
+                                         (float32)((mouse->posY - game->origin.y) / camera->zoom + camera->position.y),
                                          (uint32)game->hoveredSprite.size.x);
-    printf("mouse world %.1f/%.1f\n", mouseWorld.x, mouseWorld.y);
+    //printf("mouse world %.1f/%.1f\n", mouseWorld.x, mouseWorld.y);
 
     // Render hovered sprite
     if ((mouseWorld.x >= 0 && mouseWorld.y >= 0) && (mouseWorld.x < game->world.x && mouseWorld.y < game->world.y)) {
         glm::vec2 hoveredPos = worldToScreen((uint32)mouseWorld.x,
                                              (uint32)mouseWorld.y,
                                              (uint32)game->hoveredSprite.size.x);
-        game->hoveredSprite.position.x = game->origin.x + hoveredPos.x;
-        game->hoveredSprite.position.y = game->origin.y + hoveredPos.y;
+        game->hoveredSprite.position.x = hoveredPos.x + game->origin.x;
+        game->hoveredSprite.position.y = hoveredPos.y + game->origin.y;
 
-        DrawSprite(renderer, &game->hoveredSprite, GetShaderFromCache(SHADER_CACHE, "sprite"), game->camera.projection, game->camera.position, game->camera.zoomMatrix, game->camera.zoom);
+        DrawSprite(renderer, &game->hoveredSprite, GetShaderFromCache(SHADER_CACHE, "sprite"), camera);
     }
 }
