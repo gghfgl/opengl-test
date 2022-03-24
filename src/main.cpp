@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
     SpriteRenderer renderer = InitSpriteRenderer();
     Camera camera = InitCamera((float32)window->width,
                                (float32)window->height,
-                               glm::vec3(0.0f, 0.0f, 0.0f));
+                               glm::vec2(0.0f, 0.0f));
     Game demo = InitGameAndLoadAssets(window->width, window->height);
 
     while (demo.state != GAME_EXIT) {
@@ -41,6 +41,7 @@ int main(int argc, char *argv[]) {
 #endif
     }
 
+    // Clear textures?
     ClearSpriteRenderer(&renderer);
     TerminateWindow(window);
     delete(time);

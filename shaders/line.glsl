@@ -1,19 +1,24 @@
 #shader vertex
 #version 450 core
 
-layout (location = 0) in vec2 position; // <vec2 position>
+layout (location = 0) in vec2 vertex; // <vec2 position>
+
+uniform mat4 projection;
+uniform mat4 model;
 
 void main()
 {
-    gl_Position = vec4(position, 0.0, 1.0);
+    gl_Position = projection * model * vec4(vertex.xy, 0.0, 1.0);
 }
 
 #shader fragment
 #version 450 core
 
-out vec4 color;
+out vec4 FragColor;
+
+uniform vec4 color;
 
 void main()
 {
-    color = vec4(0.0, 1.0, 0.0, 1.0);
+    FragColor = color;
 }

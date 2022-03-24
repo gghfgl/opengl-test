@@ -12,7 +12,7 @@ enum CameraDirection {
 
 struct Camera {
     float32 speed;
-    glm::vec3 position; // @improve: back to 2D?
+    glm::vec2 position;
     float32 zoom;
 
     float32 width;
@@ -21,7 +21,7 @@ struct Camera {
 
 void updateCameraViewMatrix(Camera* camera);
 
-Camera InitCamera(float32 width, float32 height, glm::vec3 position) {
+Camera InitCamera(float32 width, float32 height, glm::vec2 position) {
     Camera camera;
     camera.position = position;
     camera.speed = 50.0f;

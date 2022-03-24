@@ -315,9 +315,9 @@ void DeleteTexture(uint32* ID) {
 // --------------------------------------------------------------
 // ------------------------ OPENGL VAO --------------------------
 // --------------------------------------------------------------
-void DrawVertexArraysTriangles(uint32 VAO) {
+void DrawVertexArraysTriangles(uint32 VAO, int32 layout) {
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glDrawArrays(GL_TRIANGLES, 0, layout);
     glBindVertexArray(0);
 }
 
